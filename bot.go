@@ -2,7 +2,9 @@ package telegrambot
 
 import (
 	"context"
+	"errors"
 	"net/http"
+	"net/url"
 )
 
 type Bot struct {
@@ -11,14 +13,46 @@ type Bot struct {
 	httpClient http.Client
 }
 
+type Option func(*Bot) error
+
+func WithBaseURL(u string) Option {
+	return func(b *Bot) error {
+		url, err := url.Parse(u)
+		if err != nil {
+			return err
+		}
+		if url.Host == "" {
+			return errors.New("url host must not be empty")
+		}
+		if url.Scheme != "https" && url.Scheme != "http" {
+			return errors.New("unsupported url scheme, use http or https")
+		}
+		b.baseURL = url.String()
+		return nil
+	}
+}
+
+func WithHTTPCLient(client http.Client) Option {
+	return func(b *Bot) error {
+		b.httpClient = client
+		return nil
+	}
+}
+
 const defaultBaseURL = "https://api.telegram.org"
 
-func NewBot(token string) *Bot {
-	return &Bot{
+func NewBot(token string, opts ...Option) (*Bot, error) {
+	bot := &Bot{
 		baseURL:    defaultBaseURL,
 		token:      token,
 		httpClient: *http.DefaultClient,
 	}
+	for _, op := range opts {
+		if err := op(bot); err != nil {
+			return nil, err
+		}
+	}
+	return bot, nil
 }
 
 func (b *Bot) call(
