@@ -41,7 +41,7 @@ type MaybeInaccessibleMessage interface {
 }
 
 type CallbackQuery struct {
-	ID              int64                     `json:"id"`
+	ID              string                    `json:"id"`
 	Message         *MaybeInaccessibleMessage `json:"message,omitempty"`
 	Data            string                    `json:"data,omitempty"`
 	InlineMessageID string                    `json:"inline_message_id,omitempty"`
