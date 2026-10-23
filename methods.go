@@ -58,3 +58,42 @@ func (b *Bot) AnswerCallbackQuery(
 ) error {
 	return b.call(ctx, answerCallbackQueryMethod, params, nil)
 }
+
+type EditMessageTextParams struct {
+	ChatID      int64                 `json:"chat_id"`
+	MessageID   int64                 `json:"message_id"`
+	Text        string                `json:"text"`
+	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
+}
+
+const editMessageTextMethod string = "editMessageText"
+
+func (b *Bot) EditMessageText(
+	ctx context.Context,
+	params EditMessageTextParams,
+) (*Message, error) {
+	var msg Message
+	if err := b.call(ctx, editMessageTextMethod, params, &msg); err != nil {
+		return nil, err
+	}
+	return &msg, nil
+}
+
+type EditMessageReplyMarkupParams struct {
+	ChatID      int64                 `json:"chat_id"`
+	MessageID   int64                 `json:"message_id"`
+	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
+}
+
+const editMessageReplyMarkupMethod string = "editMessageReplyMarkup"
+
+func (b *Bot) EditMessageReplyMarkup(
+	ctx context.Context,
+	params EditMessageReplyMarkupParams,
+) (*Message, error) {
+	var msg Message
+	if err := b.call(ctx, editMessageReplyMarkupMethod, params, &msg); err != nil {
+		return nil, err
+	}
+	return &msg, nil
+}
