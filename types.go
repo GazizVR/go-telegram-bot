@@ -41,12 +41,12 @@ type MaybeInaccessibleMessage interface {
 }
 
 type CallbackQuery struct {
-	ID              string                    `json:"id"`
-	Message         *MaybeInaccessibleMessage `json:"message,omitempty"`
-	Data            string                    `json:"data,omitempty"`
-	InlineMessageID string                    `json:"inline_message_id,omitempty"`
-	ChatInstance    string                    `json:"chat_instance,omitempty"`
-	GameShortName   string                    `json:"game_short_name,omitempty"`
+	ID              string                   `json:"id"`
+	Message         MaybeInaccessibleMessage `json:"message,omitempty"`
+	Data            string                   `json:"data,omitempty"`
+	InlineMessageID string                   `json:"inline_message_id,omitempty"`
+	ChatInstance    string                   `json:"chat_instance,omitempty"`
+	GameShortName   string                   `json:"game_short_name,omitempty"`
 }
 
 type Update struct {

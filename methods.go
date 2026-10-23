@@ -26,7 +26,7 @@ type SendMessageParams struct {
 	ChatID      int64            `json:"chat_id"`
 	Text        string           `json:"text"`
 	ReplyParams *ReplyParameters `json:"reply_parameters,omitempty"`
-	ReplyMarkup *ReplyMarkup     `json:"reply_markup,omitempty"`
+	ReplyMarkup ReplyMarkup      `json:"reply_markup,omitempty"`
 }
 
 const sendMessageMethod string = "sendMessage"
