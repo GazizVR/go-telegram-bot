@@ -41,3 +41,20 @@ func (b *Bot) SendMessage(
 	}
 	return &msg, nil
 }
+
+type AnswerCallbackQueryParams struct {
+	CallbackQueryID string `json:"callback_query_id"`
+	Text            string `json:"text,omitempty"`
+	ShowAlert       bool   `json:"show_alert,omitempty"`
+	URL             string `json:"url,omitempty"`
+	CacheTime       int    `json:"cache_time,omitempty"`
+}
+
+const answerCallbackQueryMethod string = "answerCallbackQuery"
+
+func (b *Bot) AnswerCallbackQuery(
+	ctx context.Context,
+	params AnswerCallbackQueryParams,
+) error {
+	return b.callWithErrPrefix(ctx, answerCallbackQueryMethod, params, nil)
+}
