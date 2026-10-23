@@ -56,7 +56,7 @@ func NewBot(token string, opts ...Option) (*Bot, error) {
 	return bot, nil
 }
 
-func (b *Bot) call(
+func (b *Bot) rawCall(
 	ctx context.Context,
 	method string,
 	body any,
@@ -71,13 +71,13 @@ func (b *Bot) call(
 
 const errPrefix string = "telegrambot"
 
-func (b *Bot) callWithErrPrefix(
+func (b *Bot) call(
 	ctx context.Context,
 	method string,
 	body any,
 	result any,
 ) error {
-	if err := b.call(ctx, method, body, result); err != nil {
+	if err := b.rawCall(ctx, method, body, result); err != nil {
 		prefix := fmt.Sprintf("%s: %s", errPrefix, method)
 		return fmt.Errorf("%s: %w", prefix, err)
 	}

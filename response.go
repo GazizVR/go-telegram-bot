@@ -29,7 +29,7 @@ func parseResponse(
 			}
 			return fmt.Errorf("%s (status %d)", errText, statusCode)
 		}
-		return fmt.Errorf("unmarshal respBody: %w", err)
+		return fmt.Errorf("decode response: %w", err)
 	}
 	if !resp.OK {
 		errText := "unexpected error"
@@ -62,7 +62,7 @@ func parseResponse(
 	}
 	if result != nil && len(resp.Result) > 0 {
 		if err := json.Unmarshal(resp.Result, result); err != nil {
-			return fmt.Errorf("unmarshal result: %w", err)
+			return fmt.Errorf("decode result: %w", err)
 		}
 	}
 	return nil

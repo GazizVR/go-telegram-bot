@@ -16,7 +16,7 @@ func (b *Bot) GetUpdates(
 	params GetUpdatesParams,
 ) ([]Update, error) {
 	var updates []Update
-	if err := b.callWithErrPrefix(ctx, getUpdatesMethod, params, &updates); err != nil {
+	if err := b.call(ctx, getUpdatesMethod, params, &updates); err != nil {
 		return nil, err
 	}
 	return updates, nil
@@ -36,7 +36,7 @@ func (b *Bot) SendMessage(
 	params SendMessageParams,
 ) (*Message, error) {
 	var msg Message
-	if err := b.callWithErrPrefix(ctx, sendMessageMethod, params, &msg); err != nil {
+	if err := b.call(ctx, sendMessageMethod, params, &msg); err != nil {
 		return nil, err
 	}
 	return &msg, nil
@@ -56,5 +56,5 @@ func (b *Bot) AnswerCallbackQuery(
 	ctx context.Context,
 	params AnswerCallbackQueryParams,
 ) error {
-	return b.callWithErrPrefix(ctx, answerCallbackQueryMethod, params, nil)
+	return b.call(ctx, answerCallbackQueryMethod, params, nil)
 }

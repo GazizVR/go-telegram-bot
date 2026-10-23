@@ -24,7 +24,7 @@ func do(
 	}
 	reqBody, err := json.Marshal(body)
 	if err != nil {
-		return nil, 0, fmt.Errorf("marshal body: %w", err)
+		return nil, 0, fmt.Errorf("encode request body: %w", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(reqBody))
@@ -34,7 +34,7 @@ func do(
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return nil, 0, fmt.Errorf("create request: %w", err)
+		return nil, 0, fmt.Errorf("do request: %w", err)
 	}
 	defer resp.Body.Close()
 
