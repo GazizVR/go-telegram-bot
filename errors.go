@@ -4,6 +4,7 @@ import "fmt"
 
 const errPrefix string = "telegrambot"
 
-func errorPrefix(method string) string {
-	return fmt.Sprintf("%s: %s", errPrefix, method)
+func errWithPrefix(method string, err error) error {
+    prefix := fmt.Sprintf("%s: %s", errPrefix, method)
+    return fmt.Errorf("%s: %w",prefix,err)
 }
