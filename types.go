@@ -26,12 +26,27 @@ type Message struct {
 	LinkPreviewOptions *LinkPreviewOptions `json:"link_preview_options,omitempty"`
 }
 
+func (Message) maybeInaccessbleMessage() {}
+
+type InaccessibleMessage struct {
+	Chat Chat  `json:"chat"`
+	ID   int64 `json:"message_id"`
+	Date int   `json:"date"`
+}
+
+func (InaccessibleMessage) maybeInaccessbleMessage() {}
+
+type MaybeInaccessibleMessage interface {
+	maybeInaccessbleMessage()
+}
+
 type CallbackQuery struct {
-	ID              int64  `json:"id"`
-	Data            string `json:"data,omitempty"`
-	InlineMessageID string `json:"inline_message_id,omitempty"`
-	ChatInstance    string `json:"chat_instance,omitempty"`
-	GameShortName   string `json:"game_short_name,omitempty"`
+	ID              int64                     `json:"id"`
+	Message         *MaybeInaccessibleMessage `json:"message,omitempty"`
+	Data            string                    `json:"data,omitempty"`
+	InlineMessageID string                    `json:"inline_message_id,omitempty"`
+	ChatInstance    string                    `json:"chat_instance,omitempty"`
+	GameShortName   string                    `json:"game_short_name,omitempty"`
 }
 
 type Update struct {
@@ -50,6 +65,12 @@ type InlineKeyboardButton struct {
 type InlineKeyboardMarkup struct {
 	Keyboard   [][]InlineKeyboardButton `json:"inline_keyboard"`
 	ForceReply bool                     `json:"force_reply,omitempty"`
+}
+
+func (InlineKeyboardMarkup) isReplyMarkup() {}
+
+type ReplyMarkup interface {
+	isReplyMarkup()
 }
 
 type ReplyParameters struct {
