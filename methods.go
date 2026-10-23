@@ -16,8 +16,8 @@ func (b *Bot) GetUpdates(
 	params GetUpdatesParams,
 ) ([]Update, error) {
 	var updates []Update
-	if err := b.call(ctx, getUpdatesMethod, params, &updates); err != nil {
-		return nil, errWithPrefix(getUpdatesMethod, err)
+	if err := b.callWithErrPrefix(ctx, getUpdatesMethod, params, &updates); err != nil {
+		return nil, err
 	}
 	return updates, nil
 }
@@ -36,8 +36,8 @@ func (b *Bot) SendMessage(
 	params SendMessageParams,
 ) (*Message, error) {
 	var msg Message
-	if err := b.call(ctx, sendMessageMethod, params, &msg); err != nil {
-		return nil, errWithPrefix(sendMessageMethod, err)
+	if err := b.callWithErrPrefix(ctx, sendMessageMethod, params, &msg); err != nil {
+		return nil, err
 	}
 	return &msg, nil
 }

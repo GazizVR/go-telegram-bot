@@ -3,6 +3,7 @@ package telegrambot
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 )
@@ -66,4 +67,19 @@ func (b *Bot) call(
 		return err
 	}
 	return parseResponse(respBody, statusCode, result)
+}
+
+const errPrefix string = "telegrambot"
+
+func (b *Bot) callWithErrPrefix(
+	ctx context.Context,
+	method string,
+	body any,
+	result any,
+) error {
+	if err := b.call(ctx, method, body, result); err != nil {
+		prefix := fmt.Sprintf("%s: %s", errPrefix, method)
+		return fmt.Errorf("%s: %w", prefix, err)
+	}
+	return nil
 }
