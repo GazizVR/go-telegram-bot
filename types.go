@@ -51,3 +51,7 @@ type InlineKeyboardMarkup struct {
 	Keyboard   [][]InlineKeyboardButton `json:"inline_keyboard"`
 	ForceReply bool                     `json:"force_reply,omitempty"`
 }
+
+type ReplyParameters struct {
+	MessageID *int64 `json:"message_id,omitempty"`
+}
