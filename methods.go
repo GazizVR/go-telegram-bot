@@ -3,7 +3,7 @@ package telegrambot
 import "context"
 
 type GetUpdatesParams struct {
-	Offset         int      `json:"offset,omitempty"`
+	Offset         int64    `json:"offset,omitempty"`
 	Limit          int      `json:"limit,omitempty"`
 	Timeout        int      `json:"timeout,omitempty"`
 	AllowedUpdates []string `json:"allowed_updates,omitempty"`
@@ -16,7 +16,7 @@ func (b *Bot) GetUpdates(
 	params GetUpdatesParams,
 ) ([]Update, error) {
 	var updates []Update
-	if err := b.call(ctx, getUpdatesMethod, params, &updates); err != nil {
+	if err := b.call(ctx, getUpdatesMethod, params, &updates, nil); err != nil {
 		return nil, err
 	}
 	return updates, nil
@@ -36,7 +36,7 @@ func (b *Bot) SendMessage(
 	params SendMessageParams,
 ) (*Message, error) {
 	var msg Message
-	if err := b.call(ctx, sendMessageMethod, params, &msg); err != nil {
+	if err := b.call(ctx, sendMessageMethod, params, &msg, nil); err != nil {
 		return nil, err
 	}
 	return &msg, nil
@@ -56,7 +56,7 @@ func (b *Bot) AnswerCallbackQuery(
 	ctx context.Context,
 	params AnswerCallbackQueryParams,
 ) error {
-	return b.call(ctx, answerCallbackQueryMethod, params, nil)
+	return b.call(ctx, answerCallbackQueryMethod, params, nil, nil)
 }
 
 type EditMessageTextParams struct {
@@ -73,7 +73,7 @@ func (b *Bot) EditMessageText(
 	params EditMessageTextParams,
 ) (*Message, error) {
 	var msg Message
-	if err := b.call(ctx, editMessageTextMethod, params, &msg); err != nil {
+	if err := b.call(ctx, editMessageTextMethod, params, &msg, nil); err != nil {
 		return nil, err
 	}
 	return &msg, nil
@@ -92,7 +92,32 @@ func (b *Bot) EditMessageReplyMarkup(
 	params EditMessageReplyMarkupParams,
 ) (*Message, error) {
 	var msg Message
-	if err := b.call(ctx, editMessageReplyMarkupMethod, params, &msg); err != nil {
+	if err := b.call(ctx, editMessageReplyMarkupMethod, params, &msg, nil); err != nil {
+		return nil, err
+	}
+	return &msg, nil
+}
+
+type EditMessageMediaParams struct {
+	ChatID      int64                 `json:"chat_id"`
+	MessageID   int64                 `json:"message_id"`
+	Media       InputMedia            `json:"media"`
+	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
+}
+
+const editMessageMediaMethod string = "editMessageMediaMarkup"
+
+func (b *Bot) EditMessageMedia(
+	ctx context.Context,
+	params EditMessageMediaParams,
+) (*Message, error) {
+	var msg Message
+	filePaths := make(map[string]string)
+	filePath := params.Media.inputMediaFilePath()
+	if filePath != nil {
+		filePaths["media-file"] = *filePath
+	}
+	if err := b.call(ctx, editMessageMediaMethod, params, &msg, filePaths); err != nil {
 		return nil, err
 	}
 	return &msg, nil

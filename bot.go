@@ -61,10 +61,23 @@ func (b *Bot) rawCall(
 	method string,
 	body any,
 	result any,
+	filePaths map[string]string,
 ) error {
-	respBody, statusCode, err := do(ctx, b.baseURL, b.token, method, body, b.httpClient)
-	if err != nil {
-		return err
+	var (
+		respBody   []byte
+		statusCode int
+		err        error
+	)
+	if len(filePaths) > 0 {
+		respBody, statusCode, err = doMultipart(ctx, body, filePaths, b.baseURL, b.token, method, b.httpClient)
+		if err != nil {
+			return err
+		}
+	} else {
+		respBody, statusCode, err = do(ctx, b.baseURL, b.token, method, body, b.httpClient)
+		if err != nil {
+			return err
+		}
 	}
 	return parseResponse(respBody, statusCode, result)
 }
@@ -76,8 +89,9 @@ func (b *Bot) call(
 	method string,
 	body any,
 	result any,
+	filePaths map[string]string,
 ) error {
-	if err := b.rawCall(ctx, method, body, result); err != nil {
+	if err := b.rawCall(ctx, method, body, result, filePaths); err != nil {
 		prefix := fmt.Sprintf("%s: %s", errPrefix, method)
 		return fmt.Errorf("%s: %w", prefix, err)
 	}

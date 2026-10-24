@@ -26,18 +26,17 @@ type Message struct {
 	LinkPreviewOptions *LinkPreviewOptions `json:"link_preview_options,omitempty"`
 }
 
-func (Message) maybeInaccessbleMessage() {}
+func (Message) maybeInaccessibleMessage() {}
 
 type InaccessibleMessage struct {
 	Chat Chat  `json:"chat"`
 	ID   int64 `json:"message_id"`
-	Date int   `json:"date"`
 }
 
-func (InaccessibleMessage) maybeInaccessbleMessage() {}
+func (InaccessibleMessage) maybeInaccessibleMessage() {}
 
 type MaybeInaccessibleMessage interface {
-	maybeInaccessbleMessage()
+	maybeInaccessibleMessage()
 }
 
 type CallbackQuery struct {
@@ -75,4 +74,36 @@ type ReplyMarkup interface {
 
 type ReplyParameters struct {
 	MessageID *int64 `json:"message_id,omitempty"`
+}
+
+type InputMediaVideo struct {
+	Type  string     `json:"type"`
+	Media FileSource `json:"media"`
+}
+
+func (m InputMediaVideo) inputMediaFilePath() *string {
+	switch v := m.Media.(type) {
+	case (LocalSource):
+		return &v.Filepath
+	default:
+		return nil
+	}
+}
+
+type InputMediaAudio struct {
+	Type  string     `json:"type"`
+	Media FileSource `json:"media"`
+}
+
+func (m InputMediaAudio) inputMediaFilePath() *string {
+	switch v := m.Media.(type) {
+	case (LocalSource):
+		return &v.Filepath
+	default:
+		return nil
+	}
+}
+
+type InputMedia interface {
+	inputMediaFilePath() *string
 }
