@@ -1,5 +1,7 @@
 package telegrambot
 
+import "encoding/json"
+
 type LinkPreviewOptions struct {
 	IsDisabled       bool   `json:"is_disabled,omitempty"`
 	URL              string `json:"url,omitempty"`
@@ -46,6 +48,40 @@ type CallbackQuery struct {
 	InlineMessageID string                   `json:"inline_message_id,omitempty"`
 	ChatInstance    string                   `json:"chat_instance,omitempty"`
 	GameShortName   string                   `json:"game_short_name,omitempty"`
+}
+
+func (q *CallbackQuery) UnmarshalJSON(data []byte) error {
+	type Alias CallbackQuery
+	aux := &struct {
+		*Alias
+		RawMessage json.RawMessage `json:"message,omitempty"`
+	}{
+		Alias: (*Alias)(q),
+	}
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+	type maybeInaccessibleMessage struct {
+		Date int64 `json:"date"`
+	}
+	var msg maybeInaccessibleMessage
+	if err := json.Unmarshal(aux.RawMessage, &msg); err != nil {
+		return err
+	}
+	if msg.Date == 0 {
+		var newMsg InaccessibleMessage
+		if err := json.Unmarshal(aux.RawMessage, &newMsg); err != nil {
+			return err
+		}
+		q.Message = newMsg
+	} else {
+		var newMsg Message
+		if err := json.Unmarshal(aux.RawMessage, &newMsg); err != nil {
+			return err
+		}
+		q.Message = newMsg
+	}
+	return nil
 }
 
 type Update struct {
