@@ -58,6 +58,23 @@ func (b *Bot) DeleteMessage(
 	return b.call(ctx, deleteMessageMethod, params, nil, nil)
 }
 
+type GetFileParams struct {
+	FileID string `json:"file_id"`
+}
+
+const getFileMethod = "getFile"
+
+func (b *Bot) GetFile(
+	ctx context.Context,
+	params GetFileParams,
+) (*File, error) {
+	var file File
+	if err := b.call(ctx, getFileMethod, params, &file, nil); err != nil {
+		return nil, err
+	}
+	return &file, nil
+}
+
 type AnswerCallbackQueryParams struct {
 	CallbackQueryID string `json:"callback_query_id"`
 	Text            string `json:"text,omitempty"`
@@ -135,6 +152,32 @@ func (b *Bot) EditMessageMedia(
 		filePaths[filenameFromFilepath(filePath)] = filePath
 	}
 	if err := b.call(ctx, editMessageMediaMethod, params, &msg, filePaths); err != nil {
+		return nil, err
+	}
+	return &msg, nil
+}
+
+type SendDocumentParams struct {
+	ChatID      int64            `json:"chat_id"`
+	Document    FileSource       `json:"document"`
+	ReplyParams *ReplyParameters `json:"reply_parameters,omitempty"`
+	ReplyMarkup ReplyMarkup      `json:"reply_markup,omitempty"`
+}
+
+const sendDocumentMethod string = "sendDocument"
+
+func (b *Bot) SendDocument(
+	ctx context.Context,
+	params SendDocumentParams,
+) (*Message, error) {
+	var msg Message
+	filePaths := make(map[string]string)
+	localSource, ok := params.Document.(LocalSource)
+	if ok {
+		filePath := localSource.Filepath
+		filePaths[filenameFromFilepath(filePath)] = filePath
+	}
+	if err := b.call(ctx, sendDocumentMethod, params, &msg, filePaths); err != nil {
 		return nil, err
 	}
 	return &msg, nil

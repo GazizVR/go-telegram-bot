@@ -123,3 +123,10 @@ type InputMedia struct {
 	Type  MediaType  `json:"type"`
 	Media FileSource `json:"media"`
 }
+
+type File struct {
+	ID       string `json:"file_id"`
+	UniqueID string `json:"file_unique_id"`
+	Size     int64  `json:"file_size,omitempty"`
+	Path     string `json:"file_path,omitempty"`
+}
