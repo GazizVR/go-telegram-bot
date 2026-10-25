@@ -1,6 +1,8 @@
 package telegrambot
 
-import "context"
+import (
+	"context"
+)
 
 type GetUpdatesParams struct {
 	Offset         int64    `json:"offset,omitempty"`
@@ -105,7 +107,7 @@ type EditMessageMediaParams struct {
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 }
 
-const editMessageMediaMethod string = "editMessageMediaMarkup"
+const editMessageMediaMethod string = "editMessageMedia"
 
 func (b *Bot) EditMessageMedia(
 	ctx context.Context,
@@ -115,7 +117,7 @@ func (b *Bot) EditMessageMedia(
 	filePaths := make(map[string]string)
 	filePath := params.Media.inputMediaFilePath()
 	if filePath != nil {
-		filePaths["media-file"] = *filePath
+		filePaths[filenameFromFilepath(*filePath)] = *filePath
 	}
 	if err := b.call(ctx, editMessageMediaMethod, params, &msg, filePaths); err != nil {
 		return nil, err

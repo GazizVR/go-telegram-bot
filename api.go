@@ -1,6 +1,10 @@
 package telegrambot
 
-import "strings"
+import (
+	"encoding/json"
+	"path/filepath"
+	"strings"
+)
 
 type InternalSource struct {
 	FileID string
@@ -8,8 +12,8 @@ type InternalSource struct {
 
 func (InternalSource) isFileSource() {}
 
-func (s InternalSource) MarsahlJSON() ([]byte, error) {
-	return []byte(s.FileID), nil
+func (s InternalSource) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.FileID)
 }
 
 func (s *InternalSource) UnmarshalJSON(data []byte) error {
@@ -23,8 +27,8 @@ type ExternalSource struct {
 
 func (ExternalSource) isFileSource() {}
 
-func (s ExternalSource) MarsahlJSON() ([]byte, error) {
-	return []byte(s.URL), nil
+func (s ExternalSource) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.URL)
 }
 
 func (s *ExternalSource) UnmarshalJSON(data []byte) error {
@@ -40,8 +44,13 @@ func (LocalSource) isFileSource() {}
 
 const localSourcePrefix string = "attach://"
 
-func (s LocalSource) MarsahlJSON() ([]byte, error) {
-	return []byte(localSourcePrefix + s.Filepath), nil
+func filenameFromFilepath(path string) string {
+	filename := filepath.Base(path)
+	return strings.TrimSuffix(filename, filepath.Ext(filename))
+}
+
+func (s LocalSource) MarshalJSON() ([]byte, error) {
+	return json.Marshal(localSourcePrefix + filenameFromFilepath(s.Filepath))
 }
 
 func (s *LocalSource) UnmarshalJSON(data []byte) error {

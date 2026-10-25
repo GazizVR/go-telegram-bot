@@ -81,9 +81,10 @@ func doMultipart(
 	for k, v := range rawFields {
 		var str string
 		if err := json.Unmarshal(v, &str); err != nil {
-			fields[k] = fmt.Sprintf("add field to fields: %v", v)
+			fields[k] = fmt.Sprintf("%v", v)
+		} else {
+			fields[k] = str
 		}
-		fields[k] = str
 	}
 
 	body := &bytes.Buffer{}
@@ -121,7 +122,7 @@ func doMultipart(
 	if err != nil {
 		return nil, 0, fmt.Errorf("create request: %w", err)
 	}
-	req.Header.Set("Content-Type", "multipart/form-data")
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
