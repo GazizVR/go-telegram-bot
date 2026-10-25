@@ -21,11 +21,33 @@ type Chat struct {
 	IsDirectMessages bool   `json:"is_direct_messages"`
 }
 
+type Video struct {
+	FileID string `json:"file_id"`
+}
+type Audio struct {
+	FileID string `json:"file_id"`
+}
+type Voice struct {
+	FileID string `json:"file_id"`
+}
+type VideoNote struct {
+	FileID string `json:"file_id"`
+}
+type Document struct {
+	FileID   string `json:"file_id"`
+	MimeType string `json:"mime_type,omitempty"`
+}
+
 type Message struct {
 	ID                 int64               `json:"message_id"`
 	Chat               Chat                `json:"chat"`
 	Text               string              `json:"text,omitempty"`
 	LinkPreviewOptions *LinkPreviewOptions `json:"link_preview_options,omitempty"`
+	Video              *Video              `json:"video,omitempty"`
+	Audio              *Audio              `json:"audio,omitempty"`
+	Voice              *Voice              `json:"voice,omitempty"`
+	VideoNote          *VideoNote          `json:"video_note,omitempty"`
+	Document           *Document           `json:"document,omitempty"`
 }
 
 func (Message) maybeInaccessibleMessage() {}
