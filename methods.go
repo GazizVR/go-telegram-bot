@@ -44,6 +44,20 @@ func (b *Bot) SendMessage(
 	return &msg, nil
 }
 
+type DeleteMessageParams struct {
+	ChatID    int64 `json:"chat_id"`
+	MessageID int64 `json:"message_id"`
+}
+
+const deleteMessageMethod string = "deleteMessage"
+
+func (b *Bot) DeleteMessage(
+	ctx context.Context,
+	params DeleteMessageParams,
+) error {
+	return b.call(ctx, deleteMessageMethod, params, nil, nil)
+}
+
 type AnswerCallbackQueryParams struct {
 	CallbackQueryID string `json:"callback_query_id"`
 	Text            string `json:"text,omitempty"`
