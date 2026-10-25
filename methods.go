@@ -115,9 +115,10 @@ func (b *Bot) EditMessageMedia(
 ) (*Message, error) {
 	var msg Message
 	filePaths := make(map[string]string)
-	filePath := params.Media.inputMediaFilePath()
-	if filePath != nil {
-		filePaths[filenameFromFilepath(*filePath)] = *filePath
+	localSource, ok := params.Media.Media.(LocalSource)
+	if ok {
+		filePath := localSource.Filepath
+		filePaths[filenameFromFilepath(filePath)] = filePath
 	}
 	if err := b.call(ctx, editMessageMediaMethod, params, &msg, filePaths); err != nil {
 		return nil, err

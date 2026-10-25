@@ -76,34 +76,14 @@ type ReplyParameters struct {
 	MessageID *int64 `json:"message_id,omitempty"`
 }
 
-type InputMediaVideo struct {
-	Type  string     `json:"type"`
+type MediaType string
+
+const (
+	MediaTypeVideo MediaType = "video"
+	MediaTypeAudio MediaType = "audio"
+)
+
+type InputMedia struct {
+	Type  MediaType  `json:"type"`
 	Media FileSource `json:"media"`
-}
-
-func (m InputMediaVideo) inputMediaFilePath() *string {
-	switch v := m.Media.(type) {
-	case (LocalSource):
-		return &v.Filepath
-	default:
-		return nil
-	}
-}
-
-type InputMediaAudio struct {
-	Type  string     `json:"type"`
-	Media FileSource `json:"media"`
-}
-
-func (m InputMediaAudio) inputMediaFilePath() *string {
-	switch v := m.Media.(type) {
-	case (LocalSource):
-		return &v.Filepath
-	default:
-		return nil
-	}
-}
-
-type InputMedia interface {
-	inputMediaFilePath() *string
 }
