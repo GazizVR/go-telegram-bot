@@ -6,33 +6,22 @@ import (
 	"strings"
 )
 
-type InternalSource struct {
-	FileID string
+type RemoteSource struct {
+	FileIDOrURL string
 }
 
-func (InternalSource) isFileSource() {}
+func (RemoteSource) isFileSource() {}
 
-func (s InternalSource) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.FileID)
+func (s RemoteSource) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.FileIDOrURL)
 }
 
-func (s *InternalSource) UnmarshalJSON(data []byte) error {
-	s.FileID = string(data)
-	return nil
-}
-
-type ExternalSource struct {
-	URL string
-}
-
-func (ExternalSource) isFileSource() {}
-
-func (s ExternalSource) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.URL)
-}
-
-func (s *ExternalSource) UnmarshalJSON(data []byte) error {
-	s.URL = string(data)
+func (s *RemoteSource) UnmarshalJSON(data []byte) error {
+	var fileIDOrURL string
+	if err := json.Unmarshal(data, &fileIDOrURL); err != nil {
+		return err
+	}
+	s.FileIDOrURL = fileIDOrURL
 	return nil
 }
 
@@ -54,7 +43,11 @@ func (s LocalSource) MarshalJSON() ([]byte, error) {
 }
 
 func (s *LocalSource) UnmarshalJSON(data []byte) error {
-	s.Filepath = strings.TrimPrefix(string(data), localSourcePrefix)
+	var filepath string
+	if err := json.Unmarshal(data, &filepath); err != nil {
+		return err
+	}
+	s.Filepath = strings.TrimPrefix(filepath, localSourcePrefix)
 	return nil
 }
 
