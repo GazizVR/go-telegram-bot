@@ -25,13 +25,19 @@ func (s *RemoteSource) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type sourcePrefix string
+
+const (
+	attachPrefix sourcePrefix = "attach://"
+	filePrefix   sourcePrefix = "file://"
+)
+
 type LocalSource struct {
+	prefix   sourcePrefix
 	Filepath string
 }
 
-func (LocalSource) isFileSource() {}
-
-const localSourcePrefix string = "attach://"
+func (*LocalSource) isFileSource() {}
 
 func filenameFromFilepath(path string) string {
 	filename := filepath.Base(path)
@@ -39,15 +45,22 @@ func filenameFromFilepath(path string) string {
 }
 
 func (s LocalSource) MarshalJSON() ([]byte, error) {
-	return json.Marshal(localSourcePrefix + filenameFromFilepath(s.Filepath))
+	filepath := s.Filepath
+	if s.prefix == attachPrefix {
+		filepath = filenameFromFilepath(s.Filepath)
+	}
+	return json.Marshal(string(s.prefix) + filepath)
 }
 
 func (s *LocalSource) UnmarshalJSON(data []byte) error {
-	var filepath string
-	if err := json.Unmarshal(data, &filepath); err != nil {
+	var rawFilepath string
+	if err := json.Unmarshal(data, &rawFilepath); err != nil {
 		return err
 	}
-	s.Filepath = strings.TrimPrefix(filepath, localSourcePrefix)
+	prefixInd := strings.Index(rawFilepath, "://")
+	s.prefix = sourcePrefix(rawFilepath[:prefixInd])
+	filepathInd := prefixInd + 3
+	s.Filepath = rawFilepath[filepathInd:]
 	return nil
 }
 

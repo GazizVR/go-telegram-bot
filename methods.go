@@ -18,7 +18,7 @@ func (b *Bot) GetUpdates(
 	params GetUpdatesParams,
 ) ([]Update, error) {
 	var updates []Update
-	if err := b.call(ctx, getUpdatesMethod, params, &updates, nil); err != nil {
+	if err := b.call(ctx, getUpdatesMethod, params, &updates); err != nil {
 		return nil, err
 	}
 	return updates, nil
@@ -38,7 +38,7 @@ func (b *Bot) SendMessage(
 	params SendMessageParams,
 ) (*Message, error) {
 	var msg Message
-	if err := b.call(ctx, sendMessageMethod, params, &msg, nil); err != nil {
+	if err := b.call(ctx, sendMessageMethod, params, &msg); err != nil {
 		return nil, err
 	}
 	return &msg, nil
@@ -55,7 +55,7 @@ func (b *Bot) DeleteMessage(
 	ctx context.Context,
 	params DeleteMessageParams,
 ) error {
-	return b.call(ctx, deleteMessageMethod, params, nil, nil)
+	return b.call(ctx, deleteMessageMethod, params, nil)
 }
 
 type GetFileParams struct {
@@ -69,7 +69,7 @@ func (b *Bot) GetFile(
 	params GetFileParams,
 ) (*File, error) {
 	var file File
-	if err := b.call(ctx, getFileMethod, params, &file, nil); err != nil {
+	if err := b.call(ctx, getFileMethod, params, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
@@ -89,7 +89,7 @@ func (b *Bot) AnswerCallbackQuery(
 	ctx context.Context,
 	params AnswerCallbackQueryParams,
 ) error {
-	return b.call(ctx, answerCallbackQueryMethod, params, nil, nil)
+	return b.call(ctx, answerCallbackQueryMethod, params, nil)
 }
 
 type EditMessageTextParams struct {
@@ -106,7 +106,7 @@ func (b *Bot) EditMessageText(
 	params EditMessageTextParams,
 ) (*Message, error) {
 	var msg Message
-	if err := b.call(ctx, editMessageTextMethod, params, &msg, nil); err != nil {
+	if err := b.call(ctx, editMessageTextMethod, params, &msg); err != nil {
 		return nil, err
 	}
 	return &msg, nil
@@ -125,7 +125,7 @@ func (b *Bot) EditMessageReplyMarkup(
 	params EditMessageReplyMarkupParams,
 ) (*Message, error) {
 	var msg Message
-	if err := b.call(ctx, editMessageReplyMarkupMethod, params, &msg, nil); err != nil {
+	if err := b.call(ctx, editMessageReplyMarkupMethod, params, &msg); err != nil {
 		return nil, err
 	}
 	return &msg, nil
@@ -145,13 +145,7 @@ func (b *Bot) EditMessageMedia(
 	params EditMessageMediaParams,
 ) (*Message, error) {
 	var msg Message
-	filePaths := make(map[string]string)
-	localSource, ok := params.Media.Media.(LocalSource)
-	if ok {
-		filePath := localSource.Filepath
-		filePaths[filenameFromFilepath(filePath)] = filePath
-	}
-	if err := b.call(ctx, editMessageMediaMethod, params, &msg, filePaths); err != nil {
+	if err := b.call(ctx, editMessageMediaMethod, params, &msg, params.Media.Media); err != nil {
 		return nil, err
 	}
 	return &msg, nil
@@ -171,13 +165,7 @@ func (b *Bot) SendDocument(
 	params SendDocumentParams,
 ) (*Message, error) {
 	var msg Message
-	filePaths := make(map[string]string)
-	localSource, ok := params.Document.(LocalSource)
-	if ok {
-		filePath := localSource.Filepath
-		filePaths[filenameFromFilepath(filePath)] = filePath
-	}
-	if err := b.call(ctx, sendDocumentMethod, params, &msg, filePaths); err != nil {
+	if err := b.call(ctx, sendDocumentMethod, params, &msg, params.Document); err != nil {
 		return nil, err
 	}
 	return &msg, nil
