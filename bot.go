@@ -85,20 +85,22 @@ func fileSourcesToPaths(
 			if ok {
 				filename := filepath.Base(local.Filepath)
 				filePath := filepath.Join(filesDir, filename)
-				srcFile, err := os.Open(local.Filepath)
-				if err != nil {
-					return nil, fmt.Errorf("open %s file: %w", filename, err)
-				}
-				defer srcFile.Close()
-				dstFile, err := os.Create(filePath)
-				if err != nil {
-					return nil, fmt.Errorf("create %s file copy: %w", filename, err)
-				}
-				if _, err := io.Copy(dstFile, srcFile); err != nil {
-					return nil, fmt.Errorf("write data into %s file: %w", filename, err)
-				}
-				if err := dstFile.Close(); err != nil {
-					return nil, fmt.Errorf("close %s file: %w", filename, err)
+				if filePath != local.Filepath {
+					srcFile, err := os.Open(local.Filepath)
+					if err != nil {
+						return nil, fmt.Errorf("open %s file: %w", filename, err)
+					}
+					defer srcFile.Close()
+					dstFile, err := os.Create(filePath)
+					if err != nil {
+						return nil, fmt.Errorf("create %s file copy: %w", filename, err)
+					}
+					if _, err := io.Copy(dstFile, srcFile); err != nil {
+						return nil, fmt.Errorf("write data into %s file: %w", filename, err)
+					}
+					if err := dstFile.Close(); err != nil {
+						return nil, fmt.Errorf("close %s file: %w", filename, err)
+					}
 				}
 				local.prefix = filePrefix
 				local.Filepath = filePath
