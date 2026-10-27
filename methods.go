@@ -170,3 +170,23 @@ func (b *Bot) SendDocument(
 	}
 	return &msg, nil
 }
+
+type SendVoiceParams struct {
+	ChatID      int64            `json:"chat_id"`
+	Voice       FileSource       `json:"voice"`
+	ReplyParams *ReplyParameters `json:"reply_parameters,omitempty"`
+	ReplyMarkup ReplyMarkup      `json:"reply_markup,omitempty"`
+}
+
+const sendVoiceMethod string = "sendVoice"
+
+func (b *Bot) SendVoice(
+	ctx context.Context,
+	params SendVoiceParams,
+) (*Message, error) {
+	var msg Message
+	if err := b.call(ctx, sendVoiceMethod, params, &msg, params.Voice); err != nil {
+		return nil, err
+	}
+	return &msg, nil
+}
