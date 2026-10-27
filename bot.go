@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type Bot struct {
@@ -48,9 +49,13 @@ const errPrefix string = "telegrambot"
 
 func WithFilesDir(filesDir string) Option {
 	return func(b *Bot) error {
+		if strings.TrimSpace(filesDir) == "" {
+			errText := fmt.Sprintf("%s: specified filesDir must not by empty", errPrefix)
+			return errors.New(errText)
+		}
 		dir, err := os.Open(filesDir)
 		if err != nil {
-			return fmt.Errorf("%s: open files dir by provided path: %s, error: %w", errPrefix, filesDir, err)
+			return fmt.Errorf("%s: open filesDir: %s, error: %w", errPrefix, filesDir, err)
 		}
 		dir.Close()
 		b.filesDir = filesDir
