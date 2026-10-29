@@ -10,15 +10,24 @@ type LinkPreviewOptions struct {
 	ShowAboveText    bool   `json:"show_above_text,omitempty"`
 }
 
+type ChatType string
+
+const (
+	ChatTypePrivate    ChatType = "private"
+	ChatTypeGroup      ChatType = "group"
+	ChatTypeSupergroup ChatType = "supergroup"
+	ChatTypeChannel    ChatType = "channel"
+)
+
 type Chat struct {
-	ID               int64  `json:"id"`
-	Type             string `json:"type"`
-	Title            string `json:"title"`
-	Username         string `json:"username"`
-	FirstName        string `json:"first_name"`
-	LastName         string `json:"last_name"`
-	IsForum          bool   `json:"is_forum"`
-	IsDirectMessages bool   `json:"is_direct_messages"`
+	ID               int64    `json:"id"`
+	Type             ChatType `json:"type"`
+	Title            string   `json:"title"`
+	Username         string   `json:"username"`
+	FirstName        string   `json:"first_name"`
+	LastName         string   `json:"last_name"`
+	IsForum          bool     `json:"is_forum"`
+	IsDirectMessages bool     `json:"is_direct_messages"`
 }
 
 type Video struct {
