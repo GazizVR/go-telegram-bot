@@ -1,7 +1,11 @@
 package telegrambot
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -66,4 +70,48 @@ func (s *LocalSource) UnmarshalJSON(data []byte) error {
 
 type FileSource interface {
 	isFileSource()
+}
+
+func (b *Bot) DownloadFile(
+	ctx context.Context,
+	fileID string,
+	outDir string,
+) (string, error) {
+	method := "downloadFile"
+	file, err := b.GetFile(ctx, GetFileParams{FileID: fileID})
+	if err != nil {
+		return "", err
+	}
+	if file.Path == "" {
+		return "", errWithPrefix(method, ErrFileIsMissing)
+	}
+	filePath := file.Path
+	if b.filesDir == "" {
+		endpoint, err := buildEndpoint(b.baseURL+"/file", b.token, filePath)
+		if err != nil {
+			return "", errWithPrefix(method, err)
+		}
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+		if err != nil {
+			return "", errWithPrefix(method, err)
+		}
+		respBody, statusCode, err := do(req, b.httpClient)
+		if err != nil {
+			return "", errWithPrefix(method, err)
+		}
+		if statusCode > 199 && statusCode < 300 {
+			filename := filepath.Base(filePath)
+			filePath = filepath.Join(outDir, filename)
+			if err := os.WriteFile(filePath, respBody, 0644); err != nil {
+				return "", errWithPrefix(method, err)
+			}
+		} else {
+			if err := parseResponse(respBody, statusCode, nil); err != nil {
+				return "", errWithPrefix(method, err)
+			} else {
+				return "", errWithPrefix(method, fmt.Errorf("unexpected error (status %d)", statusCode))
+			}
+		}
+	}
+	return filePath, nil
 }
