@@ -4,11 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -47,6 +45,10 @@ func WithHTTPCLient(client http.Client) Option {
 
 const errPrefix string = "telegrambot"
 
+func errWithPrefix(method string, err error) error {
+	return fmt.Errorf("%s: %s: %w", errPrefix, method, err)
+}
+
 func WithFilesDir(filesDir string) Option {
 	return func(b *Bot) error {
 		if strings.TrimSpace(filesDir) == "" {
@@ -79,51 +81,6 @@ func NewBot(token string, opts ...Option) (*Bot, error) {
 	return bot, nil
 }
 
-func fileSourcesToPaths(
-	filesDir string,
-	fileSources ...FileSource,
-) (map[string]string, error) {
-	var filePaths map[string]string
-	if filesDir != "" {
-		for _, s := range fileSources {
-			local, ok := s.(*LocalSource)
-			if ok {
-				filename := filepath.Base(local.Filepath)
-				filePath := filepath.Join(filesDir, filename)
-				if filePath != local.Filepath {
-					srcFile, err := os.Open(local.Filepath)
-					if err != nil {
-						return nil, fmt.Errorf("open %s file: %w", filename, err)
-					}
-					defer srcFile.Close()
-					dstFile, err := os.Create(filePath)
-					if err != nil {
-						return nil, fmt.Errorf("create %s file copy: %w", filename, err)
-					}
-					if _, err := io.Copy(dstFile, srcFile); err != nil {
-						return nil, fmt.Errorf("write data into %s file: %w", filename, err)
-					}
-					if err := dstFile.Close(); err != nil {
-						return nil, fmt.Errorf("close %s file: %w", filename, err)
-					}
-				}
-				local.prefix = filePrefix
-				local.Filepath = filePath
-			}
-		}
-	} else {
-		filePaths = make(map[string]string)
-		for _, s := range fileSources {
-			local, ok := s.(*LocalSource)
-			if ok {
-				local.prefix = attachPrefix
-				filePaths[filenameFromFilepath(local.Filepath)] = local.Filepath
-			}
-		}
-	}
-	return filePaths, nil
-}
-
 func (b *Bot) rawCall(
 	ctx context.Context,
 	method string,
@@ -132,24 +89,31 @@ func (b *Bot) rawCall(
 	fileSources ...FileSource,
 ) error {
 	var (
-		respBody   []byte
-		statusCode int
-		err        error
+		req *http.Request
+		err error
 	)
+	endpoint, err := buildEndpoint(b.baseURL, b.token, method)
+	if err != nil {
+		return err
+	}
 	filePaths, err := fileSourcesToPaths(b.filesDir, fileSources...)
 	if err != nil {
 		return err
 	}
 	if len(filePaths) > 0 {
-		respBody, statusCode, err = doMultipart(ctx, body, filePaths, b.baseURL, b.token, method, b.httpClient)
+		req, err = buildMultipartRequest(ctx, body, filePaths, endpoint)
 		if err != nil {
 			return err
 		}
 	} else {
-		respBody, statusCode, err = do(ctx, b.baseURL, b.token, method, body, b.httpClient)
+		req, err = buildJSONRequest(ctx, endpoint, body)
 		if err != nil {
 			return err
 		}
+	}
+	respBody, statusCode, err := do(req, b.httpClient)
+	if err != nil {
+		return err
 	}
 	return parseResponse(respBody, statusCode, result)
 }
@@ -162,8 +126,7 @@ func (b *Bot) call(
 	fileSources ...FileSource,
 ) error {
 	if err := b.rawCall(ctx, method, body, result, fileSources...); err != nil {
-		prefix := fmt.Sprintf("%s: %s", errPrefix, method)
-		return fmt.Errorf("%s: %w", prefix, err)
+		return errWithPrefix(method, err)
 	}
 	return nil
 }
